@@ -3,6 +3,7 @@ services:
   redirect-server:
     build: .
     ports:
-      - "8080:80"
+      - "5000:5000"
     environment:
-      - TARGET_URL=https://libreddit.eu.org
+      - TARGET_URLS=https://example.com,https://duckduckgo.com
+      - URLS_LIST=https://api.invidious.io

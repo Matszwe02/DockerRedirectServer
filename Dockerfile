@@ -1,17 +1,12 @@
-FROM nginx:alpine
+FROM python:3.12-slim
 
-# Install envsubst
-RUN apk add --no-cache gettext
+WORKDIR /app
 
-# Copy the Nginx configuration template
-COPY nginx.conf.template /etc/nginx/nginx.conf.template
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 
-# Create a script to generate the final Nginx configuration
-COPY entrypoint.sh /
-RUN chmod +x /entrypoint.sh
+COPY app.py ./
 
-# Expose port 80
-EXPOSE 80
+EXPOSE 5000
 
-# Set the entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]

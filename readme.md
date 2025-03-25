@@ -1,14 +1,18 @@
 Simple redirect server.
 
+- Pass URL list or a single URL as TARGET_URLS
+- Pass URL containing that URL list as URLS_LIST
+- Redirect Server will redirect to the first server that responds. Useful for services with multiple instances
+
 Usage:
 ```yml
 version: '3'
 services:
   redirect-server:
-    image: matszwe02/redirect-server:latest
-    # build: .
+    build: .
     ports:
-      - "8080:80"
+      - "5000:5000"
     environment:
-      - TARGET_URL=https://libreddit.eu.org
+      - TARGET_URLS=https://example.com,https://duckduckgo.com
+      - URLS_LIST=https://api.invidious.io
 ```
