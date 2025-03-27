@@ -4,10 +4,12 @@ import requests
 import logging
 import concurrent.futures
 import re
+import time
 
 app = Flask(__name__)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+last_url = [None, 0]
 
 
 def extract_urls_from_text(text_content) -> list[str]:
@@ -59,13 +61,22 @@ def try_redirect(urls: list[str]):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def redirect_to_target(path):
+    global last_url
+    
+    if time.time() - last_url[1] < 600:
+        logging.info(f'Using cached URL: {last_url[0]}')
+        if is_url_reachable(last_url[0]):
+            return redirect(last_url[0] + "/" + path, code=301)
+        last_url = [None, 0]
     
     if target_urls_str := os.environ.get('TARGET_URLS'):
         if ret := try_redirect(target_urls_str.split(',')):
+            last_url = [ret, time.time()]
             return redirect(ret + "/" + path, code=301)
     
     elif urls_list_url := os.environ.get('URLS_LIST'):
         if ret := try_redirect(get_urls_list(urls_list_url)):
+            last_url = [ret, time.time()]
             return redirect(ret + "/" + path, code=301)
     
     logging.error(f"No working target URLs found. Check logs.")

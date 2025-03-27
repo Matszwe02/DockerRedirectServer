@@ -8,6 +8,8 @@ Redirects url to external domain, keeping original path
 
 ## Behaviour:
 Requests are split by groups of 4.
+- Checking cached url (last working url, cache valid for 10min)
+  - returns if possible
 - Checking urls provided by TARGET_URLS
   - returns if possible
 - Checking urls provided by URLS_LIST
