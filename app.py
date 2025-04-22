@@ -74,7 +74,7 @@ def redirect_to_target(path):
             last_url = [ret, time.time()]
             return redirect(ret + "/" + path, code=301)
     
-    elif urls_list_url := os.environ.get('URLS_LIST'):
+    if urls_list_url := os.environ.get('URLS_LIST'):
         if ret := try_redirect(get_urls_list(urls_list_url)):
             last_url = [ret, time.time()]
             return redirect(ret + "/" + path, code=301)
