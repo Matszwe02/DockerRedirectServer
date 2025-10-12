@@ -15,12 +15,12 @@ last_url = [None, 0]
 def extract_urls_from_text(text_content) -> list[str]:
     """Extracts URLs from plain text content using regex."""
     return re.findall(r'https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#]*)(?![\/])', text_content)
-    
+
 
 def get_urls_list(request_url: str):
     try:
         urls = []
-        response = requests.get(request_url, timeout=10)
+        response = requests.get(request_url, timeout=5)
         
         for item in extract_urls_from_text(response.text):
             if item.startswith("http://localhost") or item.startswith("http://127."):
