@@ -34,20 +34,20 @@ def get_urls_list(request_url: str):
     return []
 
 
-def is_url_reachable(url: str):
+def is_url_reachable(url: str, path: str):
     url = url.strip().removesuffix('/')
     logging.info(f'Checking {url}...')
     try:
-        head_request = requests.head(url, timeout=5)
+        head_request = requests.head(url + path, timeout=5)
         success = head_request.status_code >= 200 and head_request.status_code < 400
         return success, url
     except:
         return False, url
 
 
-def try_redirect(urls: list[str]):
+def try_redirect(urls: list[str], path = "/"):
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(is_url_reachable, url) for url in urls]
+        futures = [executor.submit(is_url_reachable, url, path) for url in urls]
         for future in concurrent.futures.as_completed(futures):
             success, url = future.result()
             logging.info(f'Requested {url}: {success}')
@@ -62,22 +62,24 @@ def try_redirect(urls: list[str]):
 @app.route('/<path:path>')
 def redirect_to_target(path):
     global last_url
+    if not path.startswith("/"):  path = "/" + path
     
     if time.time() - last_url[1] < 600:
         logging.info(f'Using cached URL: {last_url[0]}')
-        if is_url_reachable(last_url[0]):
-            return redirect(last_url[0] + "/" + path, code=301)
+        if is_url_reachable(last_url[0], path):
+            return redirect(last_url[0] + path, code=301)
         last_url = [None, 0]
     
-    if target_urls_str := os.environ.get('TARGET_URLS'):
-        if ret := try_redirect(target_urls_str.split(',')):
-            last_url = [ret, time.time()]
-            return redirect(ret + "/" + path, code=301)
+    url_list = []
+
+    if urls := os.environ.get('TARGET_URLS'):
+        url_list.extend(urls.split(','))
+    if urls := os.environ.get('URLS_LIST'):
+        url_list.extend(get_urls_list(urls))
     
-    if urls_list_url := os.environ.get('URLS_LIST'):
-        if ret := try_redirect(get_urls_list(urls_list_url)):
-            last_url = [ret, time.time()]
-            return redirect(ret + "/" + path, code=301)
+    if ret := try_redirect(url_list, path):
+        last_url = [ret, time.time()]
+        return redirect(ret + path, code=301)
     
     logging.error(f"No working target URLs found. Check logs.")
     return "No working target URL found", 503
