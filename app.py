@@ -23,7 +23,7 @@ def get_urls_list(request_url: str):
         response = requests.get(request_url, timeout=10)
         
         for item in extract_urls_from_text(response.text):
-            if item.startswith("http://localhost") or item.startswith("http://127.0.0.1"):
+            if item.startswith("http://localhost") or item.startswith("http://127."):
                 logging.warning("URLS_LIST points to the application itself. Skipping.")
             else:
                 urls.append(item)
