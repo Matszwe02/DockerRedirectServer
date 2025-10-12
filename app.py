@@ -20,7 +20,7 @@ def extract_urls_from_text(text_content) -> list[str]:
 def get_urls_list(request_url: str):
     try:
         urls = []
-        response = requests.get(request_url, timeout=5)
+        response = requests.get(request_url, timeout=10)
         
         for item in extract_urls_from_text(response.text):
             if item.startswith("http://localhost") or item.startswith("http://127."):
