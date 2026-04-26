@@ -38,10 +38,14 @@ def is_url_reachable(url: str, path: str):
     url = url.strip().removesuffix('/')
     logging.info(f'Checking {url}...')
     try:
-        head_request = requests.head(url + path, timeout=5)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
+        }
+        head_request = requests.head(url + path, timeout=5, headers=headers)
         success = head_request.status_code >= 200 and head_request.status_code < 400
         return success, url
-    except:
+    except Exception as e:
+        logging.warning(f"Error checking URL {url}{path}: {type(e).__name__} - {e}")
         return False, url
 
 
