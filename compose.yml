@@ -7,3 +7,7 @@ services:
     environment:
       - TARGET_URLS=https://example.com,https://duckduckgo.com
       - URLS_LIST=https://api.invidious.io
+
+#       - FLARE_URL=http://flare:5000
+#   flare:
+#     build: https://github.com/Matszwe02/FlareSolverProxy.git

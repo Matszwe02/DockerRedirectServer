@@ -4,6 +4,7 @@ Redirects url to external domain, keeping original path
 
 - Pass URL list or a single URL as TARGET_URLS
 - Pass URL containing that URL list as URLS_LIST
+- Optionally pass FLARE_URL (address of [FlareSolverProxy](https://github.com/Matszwe02/FlareSolverProxy), e.g. `http://flare:5000`). All checks are then made through it, which solves anti-bot challenges (Cloudflare, Anubis)
 - Redirect Server will redirect to the first server that responds. Useful for services with multiple instances
 
 ## Behaviour:

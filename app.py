@@ -38,6 +38,15 @@ def is_url_reachable(url: str, path: str):
     url = url.strip().removesuffix('/')
     logging.info(f'Checking {url}...')
     try:
+        if flare_url := os.environ.get('FLARE_URL'):
+            response = requests.get(flare_url.rstrip('/') + '/', params={'url': url + path}, timeout=60)
+            if response.status_code != 200:
+                return False, url
+            title = re.search(r'<title[^>]*>(.*?)</title>', response.text, re.IGNORECASE | re.DOTALL)
+            if title and title.group(1).strip().lower().startswith('error'):
+                logging.warning(f"{url}{path} returned an error page: {title.group(1).strip()[:150]}")
+                return False, url
+            return True, url
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
         }
@@ -70,7 +79,7 @@ def redirect_to_target(path):
     
     if time.time() - last_url[1] < 600:
         logging.info(f'Using cached URL: {last_url[0]}')
-        if is_url_reachable(last_url[0], path):
+        if is_url_reachable(last_url[0], path)[0]:
             return redirect(last_url[0] + path, code=301)
         last_url = [None, 0]
     
