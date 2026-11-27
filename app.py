@@ -39,13 +39,15 @@ def is_url_reachable(url: str, path: str):
     logging.info(f'Checking {url}...')
     try:
         if flare_url := os.environ.get('FLARE_URL'):
+            direct = requests.get(url + path, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
             response = requests.get(flare_url.rstrip('/') + '/', params={'url': url + path}, timeout=60)
             if response.status_code != 200:
                 return False, url
-            title = re.search(r'<title[^>]*>(.*?)</title>', response.text, re.IGNORECASE | re.DOTALL)
-            if title and title.group(1).strip().lower().startswith('error'):
-                logging.warning(f"{url}{path} returned an error page: {title.group(1).strip()[:150]}")
-                return False, url
+            for page in (direct, response):
+                title = re.search(r'<title[^>]*>(.*?)</title>', page.text, re.IGNORECASE | re.DOTALL)
+                if title and title.group(1).strip().lower().startswith('error'):
+                    logging.warning(f"{url}{path} returned an error page: {title.group(1).strip()[:150]}")
+                    return False, url
             return True, url
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
