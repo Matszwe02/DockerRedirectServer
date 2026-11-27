@@ -69,15 +69,15 @@ def is_url_reliable(url: str, path: str):
 
 
 def try_redirect(urls: list[str], path = "/"):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-        futures = [executor.submit(is_url_reliable, url, path) for url in urls]
-        for future in concurrent.futures.as_completed(futures):
-            success, url = future.result()
-            logging.info(f'Requested {url}: {success}')
-            if success:
-                logging.info(f"Redirecting to: {url}")
-                executor.shutdown(wait=False, cancel_futures=True)  # Stop other futures as soon as we have a success
-                return url
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+    futures = [executor.submit(is_url_reachable, url, path) for url in urls]
+    for future in concurrent.futures.as_completed(futures):
+        success, url = future.result()
+        logging.info(f'Requested {url}: {success}')
+        if success:
+            logging.info(f"Redirecting to: {url}")
+            executor.shutdown(wait=False, cancel_futures=True)  # Stop other futures as soon as we have a success
+            return url
     return None
 
 
